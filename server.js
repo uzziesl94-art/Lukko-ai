@@ -47,4 +47,4 @@ app.post("/api/chat", async (req,res)=>{
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, ()=>console.log("LUKKO READY on "+PORT));
+app.listen(PORT, '0.0.0.0', ()=>console.log("LUKKO READY on "+PORT));
