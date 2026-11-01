@@ -1,84 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LUKKO AI</title>
-<style>
-body{background:#0f0f12;color:#fff;font-family:system-ui;margin:0;display:flex;flex-direction:column;height:100vh}
-.header{background:#1a1a22;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a35}
-.logo-area{display:flex;align-items:center;gap:10px}
-.logo{width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold}
-.title{font-weight:bold}
-.actions{display:flex;gap:8px}
-.icon-btn{background:#2a2a35;border:1px solid #3a3a45;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer}
-#chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:85%;padding:12px 14px;border-radius:16px;font-size:15px;position:relative;word-break:break-word}
-.user{background:linear-gradient(135deg,#7c3aed,#a78bfa);align-self:flex-end;border-bottom-right-radius:4px}
-.bot{background:#1e1e28;align-self:flex-start;border:1px solid #2a2a35;border-bottom-left-radius:4px}
-.msg-tools{display:flex;gap:6px;margin-top:6px}
-.tool{font-size:11px;background:#2a2a35;border:none;color:#aaa;padding:3px 8px;border-radius:10px;cursor:pointer}
-.retry-btn{background:#7c3aed;color:#fff;border:none;padding:8px 14px;border-radius:20px;margin-top:8px;font-weight:bold;cursor:pointer}
-.typing{background:#1e1e28;align-self:flex-start;padding:12px 16px;border-radius:16px;display:flex;gap:4px;align-items:center;border:1px solid #2a2a35}
-.dot{width:8px;height:8px;background:#7c3aed;border-radius:50%;animation:bounce 1.4s infinite}
-.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-.input-area{display:flex;gap:8px;padding:12px;background:#1a1a22;border-top:1px solid #2a2a35;align-items:center}
-input{flex:1;background:#2a2a35;border:none;color:#fff;padding:12px 16px;border-radius:24px;outline:none}
-button.send{background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;width:44px;height:44px;border-radius:50%;color:#fff;font-size:18px;cursor:pointer}
-.clear-input{background:#2a2a35;border:none;color:#888;width:32px;height:32px;border-radius:50%;cursor:pointer}
-</style>
-</head>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LUKKO AI</title></head>
 <body>
-<div class="header">
-  <div class="logo-area"><div class="logo">L</div><div class="title">LUKKO AI • Purple</div></div>
-  <div class="actions">
-    <button class="icon-btn" onclick="clearChat()">🗑️ Clear Chat</button>
-    <button class="icon-btn" onclick="deleteLast()">⌫ Delete Last</button>
-  </div>
-</div>
-<div id="chat"><div class="msg bot">Hello! I am LUKKO AI. How can I help you today?<div class="msg-tools"><button class="tool" onclick="copyText(this)">📋 Copy</button></div></div></div>
-<div class="input-area">
-  <button class="clear-input" onclick="clearInput()" title="Clear text">✕</button>
-  <input id="input" placeholder="Ask LUKKO anything..." onkeydown="if(event.key==='Enter')send()">
-  <button class="send" onclick="send()">➤</button>
-</div>
+<div id="chat"></div>
+<input id="msg" placeholder="Type message..."><button onclick="send()">Send</button>
 <script>
-let lastMsg="";
-const chat=document.getElementById('chat');
-const input=document.getElementById('input');
-
-function add(text,cls,isError=false){
-  const d=document.createElement('div'); d.className='msg '+cls;
-  if(isError){
-    d.innerHTML=`⚠️ Network failed - tap to retry<br><button class="retry-btn" onclick="retry()">🔄 Send Again</button>`;
-  }else{
-    const safe = text.replace(/</g,"&lt;");
-    d.innerHTML=`${safe}<div class="msg-tools"><button class="tool" onclick="copyText(this)">📋 Copy</button><button class="tool" onclick="deleteMsg(this)">🗑️ Delete</button></div>`;
-  }
-  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
-}
-function showTyping(){
-  if(document.getElementById('typing')) return;
-  const t=document.createElement('div'); t.id='typing'; t.className='typing';
-  t.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div> <span style="margin-left:8px;font-size:12px">LUKKO is typing...</span>';
-  chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
-}
-function hideTyping(){ const t=document.getElementById('typing'); if(t) t.remove(); }
-function clearInput(){ input.value=""; input.focus(); }
-function clearChat(){ if(confirm("Clear all chat?")){ chat.innerHTML='<div class="msg bot">Chat cleared. Hello! I am LUKKO AI. How can I help?<div class="msg-tools"><button class="tool" onclick="copyText(this)">📋 Copy</button></div></div>'; } }
-function deleteLast(){ const msgs=chat.querySelectorAll('.msg'); if(msgs.length>1) msgs[msgs.length-1].remove(); }
-function deleteMsg(btn){ btn.closest('.msg').remove(); }
-function copyText(btn){ const txt=btn.closest('.msg').innerText.replace('📋 Copy','').replace('🗑️ Delete','').trim(); navigator.clipboard.writeText(txt); btn.textContent='✅ Copied!'; setTimeout(()=>btn.textContent='📋 Copy',1500); }
-function retry(){ if(lastMsg){ input.value=lastMsg; send(); } }
 async function send(){
-  const text=input.value.trim(); if(!text) return;
-  lastMsg=text; add(text,'user'); input.value=''; showTyping();
+  const m=document.getElementById('msg').value;
+  if(!m)return;
+  document.getElementById('chat').innerHTML+=`<div>You: ${m}</div>`;
+  document.getElementById('msg').value='';
   try{
-    const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
-    const data=await res.json(); hideTyping();
-    if(data.ok){ add(data.answer,'bot'); }else{ add("",'bot',true); }
-  }catch(e){ hideTyping(); add("",'bot',true); }
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m})});
+    const d=await r.json();
+    document.getElementById('chat').innerHTML+=`<div>LUKKO: ${d.reply}</div>`;
+  }catch(e){ document.getElementById('chat').innerHTML+=`<div style="color:red">Network failed - ${e.message}</div>`; }
 }
 </script>
-</body>
-</html>
+</body></html>
